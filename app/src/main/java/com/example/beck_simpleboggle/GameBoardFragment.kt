@@ -40,10 +40,12 @@ class GameBoardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         wordDisplay = view.findViewById(R.id.word_display)
         clearButton = view.findViewById(R.id.clear_button)
         submitButton = view.findViewById(R.id.submit_button)
         viewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+
         viewModel.resetGameEvent.observe(viewLifecycleOwner) { reset ->
             if (reset) {
                 viewModel.resetGameEvent.value = false
@@ -52,34 +54,28 @@ class GameBoardFragment : Fragment() {
             }
         }
 
-
-
-
-
         clearButton?.setOnClickListener {
             clearBoard()
         }
 
         submitButton?.setOnClickListener {
+            if(wordBuilder.toString() == ""){
+                wordDisplay?.text = ""
+
+            }
+
             val word = wordDisplay?.text.toString()
             viewModel.submittedWord.value = word
             clearBoard()
             Log.d("GameBoardFragment", "Word Submitted: $word")
 
         }
-
-
-
-
-
-
-
     }
 
     private fun resetGame() {
         Log.d("GameBoardFragment", "Game resetting...")
         wordBuilder.clear()
-        wordDisplay?.text = "WORD"
+        wordDisplay?.text = getString(R.string.word)
         firstSelection = true
         buttons.forEach { row-> row.forEach { col->
             col.isEnabled= true
@@ -99,6 +95,7 @@ class GameBoardFragment : Fragment() {
         }
     }
     private fun initializeGameBoard(view: View) {
+        //Asked ChatGPT for help with list comprehension and syntax for getting random letters
         val vowels = listOf('A', 'E', 'I', 'O', 'U')
         val consonants = ('A'..'Z').toList() - vowels
         val totalLetters = 16
@@ -135,9 +132,8 @@ class GameBoardFragment : Fragment() {
     }
 
 
-
     private fun onButtonSelected(row: Int, col: Int, button: Button) {
-        if (firstSelection || isAdjacent(row, col)) {
+        if (firstSelection || isAdjacent(row, col) ) {
             button.isEnabled = false
             firstSelection = false
             lastSelectedRow = row
@@ -146,16 +142,10 @@ class GameBoardFragment : Fragment() {
             wordDisplay?.text = wordBuilder.toString()
 
 
-
-
-
         }
     }
 
     private fun isAdjacent(row: Int, col: Int): Boolean {
         return (row in (lastSelectedRow - 1)..(lastSelectedRow + 1)) && (col in (lastSelectedCol - 1)..(lastSelectedCol + 1))
-    }
-    fun newInstance(): GameBoardFragment {
-        return GameBoardFragment()
     }
 }
